@@ -3,205 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Mensagens Personalizadas</title>
-    <!-- Tailwind CSS for styling -->
+    <title>Arsenal de Prospecção I.M.P.A.C.T.O.</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827;
+            background-image: radial-gradient(circle at top right, rgba(20, 83, 45, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(21, 94, 117, 0.15), transparent 50%);
+        }
         .hidden { display: none !important; }
-        .message-output { white-space: pre-wrap; word-wrap: break-word; }
-        .dark-input { background-color: #1F2937 !important; }
-        #password-overlay { background-color: rgba(17, 24, 39, 0.95); }
+        .glass-card {
+            background: rgba(23, 31, 45, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #10b981, #0ea5e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .toggle-checkbox:checked { background-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .input-field {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            transition: all 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+        }
+        #message-output {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            resize: vertical;
+        }
+        #message-output:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-    <!-- Camada de Senha (Visível por padrão) -->
-    <div id="password-overlay" class="absolute inset-0 flex items-center justify-center z-50">
-        <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-2xl text-center">
-            <h2 class="text-2xl font-bold text-gray-800">Acesso Restrito</h2>
-            <p class="text-gray-500 mt-2 mb-4">Insira a senha de aluno para aceder à ferramenta.</p>
-            <input type="password" id="password-input" class="w-full text-center bg-gray-100 text-gray-900 border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="********">
-            <button id="password-submit" class="mt-4 w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg">Aceder</button>
-            <p id="error-message" class="text-red-500 text-sm mt-2 hidden">Senha incorreta. Tente novamente.</p>
+    <div id="password-overlay" class="absolute inset-0 flex items-center justify-center z-50 bg-gray-900/80 backdrop-blur-sm">
+        <div class="w-full max-w-sm p-8 bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl text-center">
+            <h2 class="text-2xl font-bold gradient-text">Método I.M.P.A.C.T.O.</h2>
+            <p class="text-gray-400 mt-2 mb-6">Insira a senha para aceder ao arsenal.</p>
+            <input type="password" id="password-input" class="w-full text-center bg-gray-700 text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500" placeholder="********">
+            <button id="password-submit" class="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg">Aceder</button>
+            <p id="error-message" class="text-red-500 text-sm mt-2 hidden">Senha incorreta.</p>
         </div>
     </div>
 
-    <!-- Conteúdo Principal do App (Inicialmente Oculto) -->
-    <div id="app-content" class="w-full max-w-xl mx-auto p-8 bg-gray-800 rounded-2xl shadow-2xl hidden">
-        
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-teal-400">Gerador de Mensagens</h1>
-            <p class="text-gray-400 mt-2">Comunicação profissional em poucos cliques.</p>
-        </div>
+    <div id="app-content" class="w-full max-w-6xl mx-auto hidden">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold gradient-text">Arsenal de Prospecção</h1>
+            <p class="text-gray-400 mt-2">Construa mensagens para cada etapa do seu funil de vendas.</p>
+        </header>
 
-        <div class="space-y-6">
-            <div>
-                <label for="template-select" class="block text-sm font-medium text-gray-300 mb-2">1. Escolha a etapa da conversa:</label>
-                <select id="template-select" class="w-full text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 dark-input">
-                    <option value="initial-approach-company">Primeira Abordagem (Para Empresa)</option>
-                    <option value="initial-approach-professional">Primeira Abordagem (Para Profissional)</option>
-                    <option value="confirm-meeting-company">Confirmar Reunião (Para Empresa)</option>
-                    <option value="confirm-meeting-professional">Confirmar Reunião (Para Profissional)</option>
-                    <option value="meeting-reminder">Lembrete (2h antes da reunião)</option>
-                </select>
-            </div>
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Coluna de Construção -->
+            <div class="glass-card p-6 sm:p-8 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="block text-lg font-bold text-white mb-4">1. Dados da Prospecção</h2>
+                    <div id="shared-data-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Inputs de dados compartilhados serão inseridos aqui -->
+                    </div>
+                </div>
 
-            <div class="p-4 bg-gray-900/50 rounded-lg">
-                <h3 class="font-semibold text-lg text-gray-300 mb-4">2. Preencha os dados:</h3>
-                
-                <div id="inputs-container" class="space-y-4">
-                    <!-- Os campos serão inseridos aqui pelo JavaScript -->
+                 <div>
+                    <label for="stage-select" class="block text-lg font-bold text-white mb-2">2. Etapa do Funil</label>
+                    <select id="stage-select" class="w-full text-white rounded-lg px-4 py-3 input-field">
+                        <option value="prospeccao_inicial">Prospecção Inicial (Primeiro Contato)</option>
+                        <option value="lembrete_reuniao">Lembrete de Reunião (2h antes)</option>
+                        <option value="follow_up_sem_resposta">Follow-up (Cliente não respondeu)</option>
+                        <option value="envio_proposta">Envio da Proposta (Pós-reunião)</option>
+                        <option value="follow_up_proposta">Follow-up (Proposta enviada)</option>
+                        <option value="envio_contrato">Envio de Contrato e Pagamento</option>
+                        <option value="agendamento_kickoff">Agendamento da Reunião de Kickoff</option>
+                        <option value="resumo_reuniao">Resumo da Reunião (Pós-kickoff)</option>
+                    </select>
+                </div>
+                <div>
+                     <h2 class="block text-lg font-bold text-white mb-4">3. Construa a sua Mensagem</h2>
+                     <div id="message-builder-container" class="space-y-4">
+                        <!-- Blocos dinâmicos serão inseridos aqui -->
+                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="mt-8">
-            <h3 class="font-semibold text-lg text-gray-300 mb-2">3. Copie sua mensagem:</h3>
-            <div id="message-output" class="message-output p-4 bg-gray-900 rounded-lg h-64 overflow-y-auto border border-gray-700"></div>
-            <div class="mt-4 flex flex-col sm:flex-row gap-3">
-                <button id="copy-btn" class="flex-1 bg-teal-500 hover:bg-teal-600 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center">
-                    <i class="fas fa-copy mr-2"></i> Copiar Mensagem
-                </button>
-                <button id="whatsapp-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center">
-                    <i class="fab fa-whatsapp mr-2"></i> Abrir no WhatsApp
-                </button>
+            <!-- Coluna de Visualização -->
+            <div class="glass-card p-6 sm:p-8 rounded-2xl flex flex-col">
+                <h2 class="text-lg font-bold text-white mb-4">4. Edite e Copie a sua Mensagem Final</h2>
+                <textarea id="message-output" class="text-sm flex-grow whitespace-pre-wrap p-4 bg-gray-800 rounded-lg min-h-[300px] border border-gray-600 overflow-y-auto w-full"></textarea>
+                <div class="mt-4">
+                    <button id="copy-btn" class="w-full bg-teal-500 hover:bg-teal-600 text-gray-900 font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300">
+                        <i class="fas fa-copy mr-2"></i><span id="copy-btn-text">Copiar Mensagem</span>
+                    </button>
+                </div>
             </div>
-             <div id="copy-feedback" class="text-center text-teal-400 mt-2 h-4"></div>
-        </div>
+        </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- LÓGICA DE SENHA ---
-            const correctPassword = "IMPACTO2025";
-            const passwordOverlay = document.getElementById('password-overlay');
-            const passwordInput = document.getElementById('password-input');
-            const passwordSubmit = document.getElementById('password-submit');
-            const errorMessage = document.getElementById('error-message');
-            const appContent = document.getElementById('app-content');
+    document.addEventListener('DOMContentLoaded', () => {
+        const correctPassword = "IMPACTO2025";
+        const passwordOverlay = document.getElementById('password-overlay');
+        const passwordInput = document.getElementById('password-input');
+        const passwordSubmit = document.getElementById('password-submit');
+        const errorMessage = document.getElementById('error-message');
+        const appContent = document.getElementById('app-content');
 
-            function checkPassword() {
-                if (passwordInput.value === correctPassword) {
-                    passwordOverlay.classList.add('hidden'); // Esconde a camada de senha
-                    appContent.classList.remove('hidden'); // Mostra o conteúdo do app
-                } else {
-                    errorMessage.classList.remove('hidden'); // Mostra a mensagem de erro
-                    passwordInput.focus();
-                }
+        function checkPassword() {
+            if (passwordInput.value === correctPassword) {
+                passwordOverlay.classList.add('hidden');
+                appContent.classList.remove('hidden');
+            } else {
+                errorMessage.classList.remove('hidden');
             }
+        }
+        passwordSubmit.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keyup', (e) => { if (e.key === "Enter") checkPassword(); });
 
-            passwordSubmit.addEventListener('click', checkPassword);
-            passwordInput.addEventListener('keyup', (event) => {
-                if (event.key === "Enter") {
-                    checkPassword();
+        let sharedState = {
+            '[Nome do Contato]': '',
+            '[Seu Nome]': '',
+            '[Nome do Negócio]': '',
+            '[Link da Reunião]': ''
+        };
+        
+        const sharedFieldsConfig = [
+            { id: '[Nome do Contato]', label: 'Nome do Contato', placeholder: 'Ex: Mariana Oliveira' },
+            { id: '[Seu Nome]', label: 'Seu Nome (Gestor)', placeholder: 'Ex: João Silva' },
+            { id: '[Nome do Negócio]', label: 'Nome do Negócio (Opcional)', placeholder: 'Ex: Loja da Mariana' },
+            { id: '[Link da Reunião]', label: 'Link da Reunião (Meet/Zoom)', placeholder: 'Cole o seu link aqui' }
+        ];
+
+        const templates = {
+             prospeccao_inicial: {
+                blocks: [
+                    { id: 'saudacao', label: 'Saudação', type: 'options', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'}, tudo bem?`, options: ['Oi, [Nome do Contato], como vai?','Prezado(a) [Nome do Contato],'] },
+                    { id: 'apresentacao', label: 'Apresentação', type: 'options', text: (s) => `Meu nome é ${s['[Seu Nome]'] || '[Seu Nome]'} e sou especialista em tráfego pago. ` + (s['[Nome do Negócio]'] ? `Encontrei o perfil da ${s['[Nome do Negócio]']} e notei o excelente trabalho que vocês fazem.` : `Encontrei o seu perfil e notei o seu excelente trabalho.`), options: ['Me chamo [Seu Nome], sou gestor de tráfego e encontrei o seu perfil. Fiquei impressionado com o vosso trabalho!', 'Sou o [Seu Nome], especialista em anúncios online. Cheguei até si e identifiquei uma grande oportunidade.'] },
+                    { id: 'conexao', label: 'Ponto de Conexão', type: 'options', text: (s) => `Vi que seus stories têm pouco engajamento e acredito que podemos melhorar isso.`, options: ['Notei que você não possui anúncios ativos no momento e está a perder uma grande oportunidade.', 'Percebi que o seu site não tem um pixel do Facebook instalado, o que impede a criação de públicos qualificados.', 'Adorei a qualidade do seu trabalho e vejo um potencial enorme para alcançar mais pessoas.'] },
+                    { id: 'objetivo', label: 'Objetivo', type: 'options', text: (s) => `Meu objetivo é ajudar profissionais como você a captar mais clientes qualificados e aumentar a sua faturação através de anúncios online.`, options:['A minha especialidade é criar campanhas de anúncios que transformam cliques em clientes, e vejo como aplicar isso no seu projeto.', 'Quero mostrar-lhe como podemos atrair um público mais qualificado para si através de estratégias de tráfego pago.'] },
+                    { id: 'oferta', label: 'Oferta', type: 'options', text: (s) => `Gostaria de oferecer uma consultoria estratégica gratuita de 30 minutos para apresentar um diagnóstico rápido e ideias aplicáveis.`, options: ['Gostaria de agendar uma breve chamada para apresentar um plano de ação personalizado para si, sem compromisso.', 'Preparei uma análise gratuita do seu posicionamento digital com 3 pontos de melhoria imediata. Gostaria de a apresentar a si.'] },
+                    { id: 'cta', label: 'Chamada para Ação', type: 'options', text: (s) => `Você teria um horário disponível na próxima semana?`, options:['Podemos conversar por 15 minutos amanhã?', 'Qual o melhor horário para uma chamada rápida ainda esta semana?'] },
+                    { id: 'despedida', label: 'Despedida', type: 'options', text: (s) => `Obrigado pela sua atenção.`, options:['Aguardo o seu retorno.','Tenha um ótimo dia!'] },
+                ]
+            },
+            lembrete_reuniao: {
+                blocks: [
+                    { id: 'saudacao', label: 'Saudação', type: 'options', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'}, tudo bem?`, options: ['Oi, [Nome do Contato]!', 'Prezado(a) [Nome do Contato],'] },
+                    { id: 'contexto', label: 'Lembrete', type: 'options', text: (s) => `Passando para confirmar a nossa reunião de hoje, às [Horário].`, options: ['Só para lembrar da nossa chamada de hoje, às [Horário].', 'Confirmando o nosso encontro de hoje, às [Horário], para falarmos sobre a sua estratégia.']},
+                    { id: 'link', label: 'Link da Reunião', type: 'text', text: (s) => `O link para a nossa chamada é: ${s['[Link da Reunião]'] || '[Link da Reunião]'}`},
+                    { id: 'despedida', label: 'Despedida', type: 'options', text: (s) => `Até logo!`, options: ['Estou ansioso para a nossa conversa!', 'Qualquer imprevisto, por favor, avise. Até já!']}
+                ]
+            },
+            follow_up_sem_resposta: {
+                blocks: [
+                     { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'}, tudo bem?` },
+                     { id: 'contexto', label: 'Contextualização', type: 'options', text: (s) => `Passando para saber se conseguiu ver a minha mensagem anterior sobre uma parceria para potenciar os seus resultados com tráfego pago.`, options:['Escrevo para dar seguimento à minha mensagem anterior.','Apenas um lembrete amigável sobre a proposta de parceria que enviei.'] },
+                     { id: 'reforco', label: 'Reforço de Valor', text: (s) => `Acredito muito que podemos gerar resultados incríveis juntos. Fico à disposição para conversarmos!` },
+                ]
+            },
+            envio_proposta: {
+                 blocks: [
+                    { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'},` },
+                    { id: 'contexto', label: 'Contexto do E-mail', text: (s) => `Conforme conversámos, é com grande entusiasmo que anexo a nossa proposta detalhada de Gestão de Tráfego, pensada exclusivamente para ajudar você a alcançar os seus objetivos.` },
+                    { id: 'proximo_passo', label: 'Próximo Passo', text: (s) => `Para darmos início, basta responder a este e-mail com "Estou de acordo com a proposta."\n\nQualquer dúvida, estou à inteira disposição.` },
+                    { id: 'despedida', label: 'Despedida', text: (s) => `Agradeço a confiança.\nAtenciosamente,\n${s['[Seu Nome]'] || '[Seu Nome]'}` },
+                 ]
+            },
+            follow_up_proposta: {
+                blocks: [
+                    { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'}, tudo bem?` },
+                    { id: 'contexto', label: 'Contexto', text: (s) => `Escrevo para saber se teve a oportunidade de analisar a proposta que enviei.` },
+                    { id: 'duvida', label: 'Esclarecimento', text: (s) => `Há alguma dúvida que eu possa esclarecer para o ajudar na decisão?\n\nFico a aguardar o seu retorno.` },
+                    { id: 'despedida', label: 'Despedida', text: (s) => `Atenciosamente,\n${s['[Seu Nome]'] || '[Seu Nome]'}` },
+                ]
+            },
+            envio_contrato: {
+                 blocks: [
+                    { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'},` },
+                    { id: 'confirmacao', label: 'Confirmação', text: (s) => `Excelente! Fico muito feliz com a sua confirmação. Estamos prontos para começar a construir resultados incríveis.` },
+                    { id: 'formalizacao', label: 'Formalização', text: (s) => `Conforme combinado, o próximo passo é a formalização. Anexo a este e-mail, encontrará o nosso contrato para assinatura digital.` },
+                    { id: 'pagamento', label: 'Pagamento', text: (s) => `Para o pagamento da entrada (R$ [Valor]), a chave PIX é [Sua Chave PIX].` },
+                    { id: 'onboarding', label: 'Próximo Passo', text: (s) => `Assim que recebermos o contrato assinado e a confirmação do pagamento, entraremos em contato para agendarmos a nossa Reunião de Kickoff.` },
+                    { id: 'despedida', label: 'Despedida', text: (s) => `Vamos em frente!\nAtenciosamente,\n${s['[Seu Nome]'] || '[Seu Nome]'}` },
+                 ]
+            },
+            agendamento_kickoff: {
+                blocks: [
+                    { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'},` },
+                    { id: 'contexto', label: 'Contexto', text: (s) => `Com o contrato assinado e o pagamento confirmado, é hora de darmos o pontapé inicial na nossa estratégia!\n\nO próximo passo é agendarmos a nossa Reunião de Onboarding Estratégico (Kickoff).` },
+                    { id: 'agendamento', label: 'Agendamento', text: (s) => `Para agilizar, por favor, escolha o melhor horário no meu calendário: ${s['[Link da Reunião]'] || '[Seu Link de Agendamento]'}` },
+                    { id: 'despedida', label: 'Despedida', text: (s) => `Estou ansioso para começarmos.\nAtenciosamente,\n${s['[Seu Nome]'] || '[Seu Nome]'}` },
+                ]
+            },
+            resumo_reuniao: {
+                blocks: [
+                    { id: 'saudacao', label: 'Saudação', text: (s) => `Olá, ${s['[Nome do Contato]'] || '[Nome do Contato]'},` },
+                    { id: 'agradecimento', label: 'Agradecimento', text: (s) => `Foi um prazer conversar consigo hoje na nossa reunião de kickoff. O encontro foi extremamente produtivo.` },
+                    { id: 'resumo_estrategia', label: 'Resumo da Estratégia', text: (s) => `Para garantir que estamos na mesma página, o nosso foco inicial será: [Descrever a estratégia definida].` },
+                    { id: 'proximos_passos', label: 'Próximos Passos', text: (s) => `A nossa equipa já está a trabalhar e o nosso compromisso é: [Descrever os próximos passos e prazos].` },
+                    { id: 'despedida', label: 'Despedida', text: (s) => `Manteremos você atualizado sobre cada etapa.\nVamos com tudo!\nAtenciosamente,\n${s['[Seu Nome]'] || '[Seu Nome]'}` },
+                ]
+            }
+        };
+
+        const stageSelect = document.getElementById('stage-select');
+        const builderContainer = document.getElementById('message-builder-container');
+        const sharedDataContainer = document.getElementById('shared-data-container');
+        const output = document.getElementById('message-output');
+
+        function renderSharedInputs() {
+            sharedDataContainer.innerHTML = sharedFieldsConfig.map(field => `
+                <div>
+                    <label for="shared-${field.id}" class="block text-sm font-medium text-gray-300 mb-1">${field.label}</label>
+                    <input type="text" id="shared-${field.id}" data-key="${field.id}" placeholder="${field.placeholder}" class="w-full text-white rounded-md px-3 py-2 input-field">
+                </div>
+            `).join('');
+            
+            sharedDataContainer.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    sharedState[e.target.dataset.key] = e.target.value;
+                    renderBuilder(false);
+                });
+            });
+        }
+        
+        function renderBuilder(isNewStage = true) {
+            const stageKey = stageSelect.value;
+            const stage = templates[stageKey];
+            if(isNewStage) builderContainer.innerHTML = '';
+
+            stage.blocks.forEach((block, index) => {
+                let blockEl = document.getElementById(`block-container-${block.id}-${index}`);
+                if(!blockEl) {
+                    blockEl = document.createElement('div');
+                    blockEl.id = `block-container-${block.id}-${index}`;
+                    blockEl.className = 'p-4 bg-gray-800/50 border border-gray-600 rounded-lg';
+                    builderContainer.appendChild(blockEl);
+                }
+
+                let optionsHtml = '';
+                if(block.type === 'options') {
+                    const selectOptions = block.options.map(opt => `<option value="${opt}">${opt.substring(0, 50)}...</option>`).join('');
+                    optionsHtml = `<div class="relative"><select data-target-id="${block.id}" class="w-full mb-2 text-white rounded-md px-3 py-2 input-field appearance-none"><option value="">-- Ver Sugestões --</option>${selectOptions}</select><i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i></div>`;
+                }
+                
+                blockEl.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="font-semibold text-gray-300">${block.label}</label>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" name="toggle" data-id="${block.id}" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer right-0"/>
+                            <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-500 cursor-pointer"></label>
+                        </div>
+                    </div>
+                    ${optionsHtml}
+                    <textarea data-id="${block.id}" class="w-full text-white rounded-md px-3 py-2 input-field" rows="3"></textarea>
+                `;
+            });
+            updateAllTextareas();
+            attachListeners();
+            generateMessage();
+        }
+        
+        function updateAllTextareas() {
+            const stageKey = stageSelect.value;
+            const stage = templates[stageKey];
+            stage.blocks.forEach(block => {
+                const textarea = builderContainer.querySelector(`textarea[data-id="${block.id}"]`);
+                if(textarea) {
+                    textarea.value = block.text(sharedState);
                 }
             });
+        }
 
-            // --- LÓGICA DO GERADOR DE MENSAGENS ---
-            const templates = {
-                'initial-approach-company': {
-                    fields: ['[Seu Nome]', '[Nome do Contato]', '[Nome da Empresa]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
-                    template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei o perfil da [Nome da Empresa] e notei o excelente trabalho que vocês fazem.\n\nMeu objetivo é ajudar empresas como a sua a captar mais clientes qualificados e aumentar o faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente no seu negócio.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nCaso não seja você o responsável pelo marketing, poderia, por gentileza, me indicar com quem eu poderia conversar?\n\nObrigado pela sua atenção.`
-                },
-                'initial-approach-professional': {
-                    fields: ['[Seu Nome]', '[Nome do Contato]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
-                    template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei seu perfil e notei o excelente trabalho que você faz.\n\nMeu objetivo é ajudar profissionais como você a captar mais clientes qualificados e aumentar seu faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente para você.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nObrigado pela sua atenção.`
-                },
-                'confirm-meeting-company': {
-                    fields: ['[Nome do Contato]', '[Nome da Empresa]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
-                    template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome da Empresa]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
-                },
-                'confirm-meeting-professional': {
-                    fields: ['[Nome do Contato]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
-                    template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome do Contato]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
-                },
-                'meeting-reminder': {
-                    fields: ['[Nome do Contato]', '[Horário]'],
-                    template: `Olá, [Nome do Contato], tudo bem? Passando para confirmar nossa reunião de hoje, às [Horário].\n\nQualquer imprevisto, por favor, me avise.\n\nAté logo!`
+        function generateMessage() {
+            const stageKey = stageSelect.value;
+            const stage = templates[stageKey];
+            let messageParts = [];
+
+            stage.blocks.forEach(block => {
+                const toggle = builderContainer.querySelector(`input[type="checkbox"][data-id="${block.id}"]`);
+                const textarea = builderContainer.querySelector(`textarea[data-id="${block.id}"]`);
+                if (toggle && toggle.checked && textarea) {
+                    messageParts.push(textarea.value);
                 }
+            });
+            output.value = messageParts.join('\n\n').trim();
+        }
+
+        function attachListeners() {
+            builderContainer.querySelectorAll('textarea, input[type="checkbox"]').forEach(el => {
+                el.addEventListener('input', generateMessage);
+                el.addEventListener('change', generateMessage);
+            });
+            builderContainer.querySelectorAll('select').forEach(selectEl => {
+                selectEl.addEventListener('change', (e) => {
+                    const targetId = e.target.dataset.targetId;
+                    const targetTextarea = builderContainer.querySelector(`textarea[data-id="${targetId}"]`);
+                    if(targetTextarea && e.target.value) {
+                        let newText = e.target.value;
+                        Object.keys(sharedState).forEach(key => {
+                            const regex = new RegExp(key.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
+                            newText = newText.replace(regex, sharedState[key] || key);
+                        });
+                        targetTextarea.value = newText;
+                        e.target.selectedIndex = 0;
+                        generateMessage();
+                    }
+                });
+            });
+        }
+        
+        stageSelect.addEventListener('change', () => renderBuilder(true));
+        output.addEventListener('input', () => {});
+
+        const copyBtn = document.getElementById('copy-btn');
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = output.value;
+            // Fallback function for maximum compatibility
+            const fallbackCopy = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed"; 
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopySuccess();
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                }
+                document.body.removeChild(textArea);
             };
 
-            const select = document.getElementById('template-select');
-            const inputsContainer = document.getElementById('inputs-container');
-            const output = document.getElementById('message-output');
-            const copyBtn = document.getElementById('copy-btn');
-            const whatsappBtn = document.getElementById('whatsapp-btn');
-            const copyFeedback = document.getElementById('copy-feedback');
+            const showCopySuccess = () => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.classList.remove('bg-teal-500', 'hover:bg-teal-600');
+                copyBtn.classList.add('bg-green-600', 'cursor-not-allowed');
+                copyBtn.innerHTML = 'Copiado! <i class="fas fa-check ml-1"></i>';
+                copyBtn.disabled = true;
+                setTimeout(() => {
+                    copyBtn.classList.add('bg-teal-500', 'hover:bg-teal-600');
+                    copyBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.disabled = false;
+                }, 2000);
+            };
 
-            function updateInputsAndMessage() {
-                const selectedKey = select.value;
-                const currentFields = templates[selectedKey].fields;
-                
-                // Limpa os inputs antigos
-                inputsContainer.innerHTML = '';
-                
-                // Cria os novos inputs
-                currentFields.forEach(placeholder => {
-                    const inputWrapper = document.createElement('div');
-                    const label = document.createElement('label');
-                    label.className = 'text-sm text-gray-400';
-                    label.textContent = placeholder.replace(/[\[\]]/g, '');
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.dataset.placeholder = placeholder;
-                    if (placeholder === '[Sua Oferta Gratuita]') {
-                        input.placeholder = `Ex: uma consultoria de 30 minutos`;
-                    } else if (placeholder === '[Sugestões de Horário]') {
-                        input.placeholder = `Ex: quinta às 10h ou sexta às 15h`;
-                    } else {
-                        input.placeholder = `Insira ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`;
-                    }
-                    input.className = 'input-field w-full mt-1 text-white border-2 border-gray-600 rounded-lg px-3 py-2 dark-input';
-                    input.addEventListener('input', generateMessage);
-                    inputWrapper.appendChild(label);
-                    inputWrapper.appendChild(input);
-                    inputsContainer.appendChild(inputWrapper);
+            // Use the modern Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(showCopySuccess, () => {
+                    fallbackCopy(textToCopy); // Try fallback if modern API fails
                 });
-
-                generateMessage(); // Gera a mensagem inicial
+            } else {
+                fallbackCopy(textToCopy); // Use fallback for older browsers
             }
-
-            function generateMessage() {
-                const selectedKey = select.value;
-                let currentTemplate = templates[selectedKey].template;
-                const activeInputs = inputsContainer.querySelectorAll('input');
-                activeInputs.forEach(input => {
-                    const placeholder = input.dataset.placeholder;
-                    const value = input.value.trim() === '' ? placeholder : input.value;
-                    const regex = new RegExp(placeholder.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
-                    currentTemplate = currentTemplate.replace(regex, value);
-                });
-                output.textContent = currentTemplate;
-            }
-            
-            copyBtn.addEventListener('click', () => {
-                const textToCopy = output.textContent;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    copyFeedback.textContent = 'Mensagem copiada com sucesso!';
-                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-                }, () => {
-                    copyFeedback.textContent = 'Falha ao copiar.';
-                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-                });
-            });
-
-            whatsappBtn.addEventListener('click', () => {
-                const message = encodeURIComponent(output.textContent);
-                window.open(`https://wa.me/?text=${message}`, '_blank');
-            });
-
-            select.addEventListener('change', updateInputsAndMessage);
-            
-            // Configuração inicial
-            updateInputsAndMessage();
         });
+        
+        renderSharedInputs();
+        renderBuilder();
+    });
     </script>
 </body>
 </html>
