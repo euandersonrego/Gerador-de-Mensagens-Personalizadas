@@ -17,7 +17,6 @@
         .hidden { display: none !important; }
         .message-output { white-space: pre-wrap; word-wrap: break-word; }
         .dark-input { background-color: #1F2937 !important; }
-        /* Adicionando estilo para o overlay da senha, que é claro */
         #password-overlay { background-color: rgba(17, 24, 39, 0.95); }
     </style>
 </head>
@@ -77,16 +76,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- LÓGICA DE SENHA ---
-            const correctPassword = "IMPACTO2025"; // A mesma senha secreta
+            // --- ELEMENTOS GLOBAIS ---
+            const correctPassword = "IMPACTO2025";
             const passwordOverlay = document.getElementById('password-overlay');
             const passwordInput = document.getElementById('password-input');
             const passwordSubmit = document.getElementById('password-submit');
             const errorMessage = document.getElementById('error-message');
             const appContent = document.getElementById('app-content');
 
+            // --- FUNÇÃO DE INICIALIZAÇÃO DO APP ---
             function initializeApp() {
-                // --- LÓGICA DO GERADOR DE MENSAGENS (só roda depois da senha correta) ---
                 const templates = {
                     'initial-approach-company': {
                         fields: ['[Seu Nome]', '[Nome do Contato]', '[Nome da Empresa]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
@@ -109,13 +108,11 @@
                         template: `Olá, [Nome do Contato], tudo bem? Passando para confirmar nossa reunião de hoje, às [Horário].\n\nQualquer imprevisto, por favor, me avise.\n\nAté logo!`
                     }
                 };
-
                 const select = document.getElementById('template-select');
                 const output = document.getElementById('message-output');
                 const copyBtn = document.getElementById('copy-btn');
                 const whatsappBtn = document.getElementById('whatsapp-btn');
                 const copyFeedback = document.getElementById('copy-feedback');
-                
                 const inputContainers = {
                     'initial-approach-company': document.getElementById('inputs-initial-approach-company'),
                     'initial-approach-professional': document.getElementById('inputs-initial-approach-professional'),
@@ -127,17 +124,16 @@
                 function createInputs() {
                     for (const key in templates) {
                         const container = inputContainers[key];
+                        container.innerHTML = ''; // Garante que os campos não sejam duplicados
                         const fields = templates[key].fields;
                         fields.forEach(placeholder => {
                             const inputWrapper = document.createElement('div');
                             const label = document.createElement('label');
                             label.className = 'text-sm text-gray-400';
                             label.textContent = placeholder.replace(/[\[\]]/g, '');
-                            
                             const input = document.createElement('input');
                             input.type = 'text';
                             input.dataset.placeholder = placeholder;
-                            
                             if (placeholder === '[Sua Oferta Gratuita]') {
                                 input.placeholder = `Ex: uma consultoria de 30 minutos`;
                             } else if (placeholder === '[Sugestões de Horário]') {
@@ -145,10 +141,8 @@
                             } else {
                                 input.placeholder = `Insira ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`;
                             }
-
                             input.className = 'input-field w-full mt-1 text-white border-2 border-gray-600 rounded-lg px-3 py-2 dark-input';
                             input.addEventListener('input', generateMessage);
-                            
                             inputWrapper.appendChild(label);
                             inputWrapper.appendChild(input);
                             container.appendChild(inputWrapper);
@@ -159,7 +153,6 @@
                 function generateMessage() {
                     const selectedKey = select.value;
                     let currentTemplate = templates[selectedKey].template;
-                    
                     const activeInputs = inputContainers[selectedKey].querySelectorAll('input');
                     activeInputs.forEach(input => {
                         const placeholder = input.dataset.placeholder;
@@ -167,7 +160,6 @@
                         const regex = new RegExp(placeholder.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
                         currentTemplate = currentTemplate.replace(regex, value);
                     });
-                    
                     output.textContent = currentTemplate;
                 }
 
@@ -182,19 +174,13 @@
 
                 copyBtn.addEventListener('click', () => {
                     const textToCopy = output.textContent;
-                    const textArea = document.createElement('textarea');
-                    textArea.value = textToCopy;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
+                    navigator.clipboard.writeText(textToCopy).then(() => {
                         copyFeedback.textContent = 'Mensagem copiada com sucesso!';
-                    } catch (err) {
+                        setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                    }, () => {
                         copyFeedback.textContent = 'Falha ao copiar.';
-                    }
-                    document.body.removeChild(textArea);
-                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                        setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                    });
                 });
 
                 whatsappBtn.addEventListener('click', () => {
@@ -208,6 +194,7 @@
                 updateVisibleInputs();
             }
 
+            // --- LÓGICA DE VERIFICAÇÃO DE SENHA ---
             function checkPassword() {
                 if (passwordInput.value === correctPassword) {
                     passwordOverlay.style.display = 'none';
