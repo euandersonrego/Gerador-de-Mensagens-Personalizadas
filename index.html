@@ -22,7 +22,7 @@
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <!-- Camada de Senha -->
+    <!-- Camada de Senha (Visível por padrão) -->
     <div id="password-overlay" class="absolute inset-0 flex items-center justify-center z-50">
         <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-2xl text-center">
             <h2 class="text-2xl font-bold text-gray-800">Acesso Restrito</h2>
@@ -35,10 +35,12 @@
 
     <!-- Conteúdo Principal do App (Inicialmente Oculto) -->
     <div id="app-content" class="w-full max-w-xl mx-auto p-8 bg-gray-800 rounded-2xl shadow-2xl hidden">
+        
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-teal-400">Gerador de Mensagens</h1>
             <p class="text-gray-400 mt-2">Comunicação profissional em poucos cliques.</p>
         </div>
+
         <div class="space-y-6">
             <div>
                 <label for="template-select" class="block text-sm font-medium text-gray-300 mb-2">1. Escolha a etapa da conversa:</label>
@@ -50,15 +52,16 @@
                     <option value="meeting-reminder">Lembrete (2h antes da reunião)</option>
                 </select>
             </div>
+
             <div class="p-4 bg-gray-900/50 rounded-lg">
                 <h3 class="font-semibold text-lg text-gray-300 mb-4">2. Preencha os dados:</h3>
-                <div id="inputs-initial-approach-company" class="space-y-4"></div>
-                <div id="inputs-initial-approach-professional" class="hidden space-y-4"></div>
-                <div id="inputs-confirm-meeting-company" class="hidden space-y-4"></div>
-                <div id="inputs-confirm-meeting-professional" class="hidden space-y-4"></div>
-                <div id="inputs-meeting-reminder" class="hidden space-y-4"></div>
+                
+                <div id="inputs-container" class="space-y-4">
+                    <!-- Os campos serão inseridos aqui pelo JavaScript -->
+                </div>
             </div>
         </div>
+
         <div class="mt-8">
             <h3 class="font-semibold text-lg text-gray-300 mb-2">3. Copie sua mensagem:</h3>
             <div id="message-output" class="message-output p-4 bg-gray-900 rounded-lg h-64 overflow-y-auto border border-gray-700"></div>
@@ -70,13 +73,13 @@
                     <i class="fab fa-whatsapp mr-2"></i> Abrir no WhatsApp
                 </button>
             </div>
-            <div id="copy-feedback" class="text-center text-teal-400 mt-2 h-4"></div>
+             <div id="copy-feedback" class="text-center text-teal-400 mt-2 h-4"></div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- ELEMENTOS GLOBAIS ---
+            // --- LÓGICA DE SENHA ---
             const correctPassword = "IMPACTO2025";
             const passwordOverlay = document.getElementById('password-overlay');
             const passwordInput = document.getElementById('password-input');
@@ -84,132 +87,120 @@
             const errorMessage = document.getElementById('error-message');
             const appContent = document.getElementById('app-content');
 
-            // --- FUNÇÃO DE INICIALIZAÇÃO DO APP ---
-            function initializeApp() {
-                const templates = {
-                    'initial-approach-company': {
-                        fields: ['[Seu Nome]', '[Nome do Contato]', '[Nome da Empresa]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
-                        template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei o perfil da [Nome da Empresa] e notei o excelente trabalho que vocês fazem.\n\nMeu objetivo é ajudar empresas como a sua a captar mais clientes qualificados e aumentar o faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente no seu negócio.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nCaso não seja você o responsável pelo marketing, poderia, por gentileza, me indicar com quem eu poderia conversar?\n\nObrigado pela sua atenção.`
-                    },
-                    'initial-approach-professional': {
-                        fields: ['[Seu Nome]', '[Nome do Contato]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
-                        template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei seu perfil e notei o excelente trabalho que você faz.\n\nMeu objetivo é ajudar profissionais como você a captar mais clientes qualificados e aumentar seu faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente para você.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nObrigado pela sua atenção.`
-                    },
-                    'confirm-meeting-company': {
-                        fields: ['[Nome do Contato]', '[Nome da Empresa]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
-                        template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome da Empresa]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
-                    },
-                    'confirm-meeting-professional': {
-                        fields: ['[Nome do Contato]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
-                        template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome do Contato]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
-                    },
-                    'meeting-reminder': {
-                        fields: ['[Nome do Contato]', '[Horário]'],
-                        template: `Olá, [Nome do Contato], tudo bem? Passando para confirmar nossa reunião de hoje, às [Horário].\n\nQualquer imprevisto, por favor, me avise.\n\nAté logo!`
-                    }
-                };
-                const select = document.getElementById('template-select');
-                const output = document.getElementById('message-output');
-                const copyBtn = document.getElementById('copy-btn');
-                const whatsappBtn = document.getElementById('whatsapp-btn');
-                const copyFeedback = document.getElementById('copy-feedback');
-                const inputContainers = {
-                    'initial-approach-company': document.getElementById('inputs-initial-approach-company'),
-                    'initial-approach-professional': document.getElementById('inputs-initial-approach-professional'),
-                    'confirm-meeting-company': document.getElementById('inputs-confirm-meeting-company'),
-                    'confirm-meeting-professional': document.getElementById('inputs-confirm-meeting-professional'),
-                    'meeting-reminder': document.getElementById('inputs-meeting-reminder')
-                };
-
-                function createInputs() {
-                    for (const key in templates) {
-                        const container = inputContainers[key];
-                        container.innerHTML = ''; // Garante que os campos não sejam duplicados
-                        const fields = templates[key].fields;
-                        fields.forEach(placeholder => {
-                            const inputWrapper = document.createElement('div');
-                            const label = document.createElement('label');
-                            label.className = 'text-sm text-gray-400';
-                            label.textContent = placeholder.replace(/[\[\]]/g, '');
-                            const input = document.createElement('input');
-                            input.type = 'text';
-                            input.dataset.placeholder = placeholder;
-                            if (placeholder === '[Sua Oferta Gratuita]') {
-                                input.placeholder = `Ex: uma consultoria de 30 minutos`;
-                            } else if (placeholder === '[Sugestões de Horário]') {
-                                input.placeholder = `Ex: quinta às 10h ou sexta às 15h`;
-                            } else {
-                                input.placeholder = `Insira ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`;
-                            }
-                            input.className = 'input-field w-full mt-1 text-white border-2 border-gray-600 rounded-lg px-3 py-2 dark-input';
-                            input.addEventListener('input', generateMessage);
-                            inputWrapper.appendChild(label);
-                            inputWrapper.appendChild(input);
-                            container.appendChild(inputWrapper);
-                        });
-                    }
-                }
-
-                function generateMessage() {
-                    const selectedKey = select.value;
-                    let currentTemplate = templates[selectedKey].template;
-                    const activeInputs = inputContainers[selectedKey].querySelectorAll('input');
-                    activeInputs.forEach(input => {
-                        const placeholder = input.dataset.placeholder;
-                        const value = input.value.trim() === '' ? placeholder : input.value;
-                        const regex = new RegExp(placeholder.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
-                        currentTemplate = currentTemplate.replace(regex, value);
-                    });
-                    output.textContent = currentTemplate;
-                }
-
-                function updateVisibleInputs() {
-                    const selectedKey = select.value;
-                    Object.values(inputContainers).forEach(container => container.classList.add('hidden'));
-                    if (inputContainers[selectedKey]) {
-                        inputContainers[selectedKey].classList.remove('hidden');
-                    }
-                    generateMessage();
-                }
-
-                copyBtn.addEventListener('click', () => {
-                    const textToCopy = output.textContent;
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        copyFeedback.textContent = 'Mensagem copiada com sucesso!';
-                        setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-                    }, () => {
-                        copyFeedback.textContent = 'Falha ao copiar.';
-                        setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-                    });
-                });
-
-                whatsappBtn.addEventListener('click', () => {
-                    const message = encodeURIComponent(output.textContent);
-                    window.open(`https://wa.me/?text=${message}`, '_blank');
-                });
-
-                select.addEventListener('change', updateVisibleInputs);
-
-                createInputs();
-                updateVisibleInputs();
-            }
-
-            // --- LÓGICA DE VERIFICAÇÃO DE SENHA ---
             function checkPassword() {
                 if (passwordInput.value === correctPassword) {
-                    passwordOverlay.style.display = 'none';
-                    appContent.style.display = 'block';
-                    initializeApp(); // Inicia o app APENAS depois da senha correta
+                    passwordOverlay.classList.add('hidden'); // Esconde a camada de senha
+                    appContent.classList.remove('hidden'); // Mostra o conteúdo do app
                 } else {
-                    errorMessage.style.display = 'block';
+                    errorMessage.classList.remove('hidden'); // Mostra a mensagem de erro
                     passwordInput.focus();
                 }
             }
 
             passwordSubmit.addEventListener('click', checkPassword);
-            passwordInput.addEventListener('keyup', function(event) {
-                if (event.key === "Enter") { checkPassword(); }
+            passwordInput.addEventListener('keyup', (event) => {
+                if (event.key === "Enter") {
+                    checkPassword();
+                }
             });
+
+            // --- LÓGICA DO GERADOR DE MENSAGENS ---
+            const templates = {
+                'initial-approach-company': {
+                    fields: ['[Seu Nome]', '[Nome do Contato]', '[Nome da Empresa]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
+                    template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei o perfil da [Nome da Empresa] e notei o excelente trabalho que vocês fazem.\n\nMeu objetivo é ajudar empresas como a sua a captar mais clientes qualificados e aumentar o faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente no seu negócio.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nCaso não seja você o responsável pelo marketing, poderia, por gentileza, me indicar com quem eu poderia conversar?\n\nObrigado pela sua atenção.`
+                },
+                'initial-approach-professional': {
+                    fields: ['[Seu Nome]', '[Nome do Contato]', '[Sua Oferta Gratuita]', '[Sugestões de Horário]'],
+                    template: `Olá, [Nome do Contato], tudo bem?\n\nMeu nome é [Seu Nome] e sou especialista em tráfego pago. Encontrei seu perfil e notei o excelente trabalho que você faz.\n\nMeu objetivo é ajudar profissionais como você a captar mais clientes qualificados e aumentar seu faturamento através de anúncios online.\n\nGostaria de oferecer [Sua Oferta Gratuita] para apresentar um diagnóstico rápido e algumas ideias que podem ser aplicadas imediatamente para você.\n\nVocê teria um horário disponível para conversarmos? Sugiro estes horários: [Sugestões de Horário]. Se preferir outro momento, me avise.\n\nObrigado pela sua atenção.`
+                },
+                'confirm-meeting-company': {
+                    fields: ['[Nome do Contato]', '[Nome da Empresa]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
+                    template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome da Empresa]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
+                },
+                'confirm-meeting-professional': {
+                    fields: ['[Nome do Contato]', '[Data]', '[Horário]', '[Seu Link do Google Meet]', '[Seu Nome]'],
+                    template: `Olá, [Nome do Contato]!\n\nÓtimo! Nossa reunião está confirmada. Seguem os detalhes:\n\nAssunto: Consultoria Estratégica | [Seu Nome] & [Nome do Contato]\nData e Horário: [Data], às [Horário]\nLink da Sala (Google Meet): [Seu Link do Google Meet]\n\nAté breve!`
+                },
+                'meeting-reminder': {
+                    fields: ['[Nome do Contato]', '[Horário]'],
+                    template: `Olá, [Nome do Contato], tudo bem? Passando para confirmar nossa reunião de hoje, às [Horário].\n\nQualquer imprevisto, por favor, me avise.\n\nAté logo!`
+                }
+            };
+
+            const select = document.getElementById('template-select');
+            const inputsContainer = document.getElementById('inputs-container');
+            const output = document.getElementById('message-output');
+            const copyBtn = document.getElementById('copy-btn');
+            const whatsappBtn = document.getElementById('whatsapp-btn');
+            const copyFeedback = document.getElementById('copy-feedback');
+
+            function updateInputsAndMessage() {
+                const selectedKey = select.value;
+                const currentFields = templates[selectedKey].fields;
+                
+                // Limpa os inputs antigos
+                inputsContainer.innerHTML = '';
+                
+                // Cria os novos inputs
+                currentFields.forEach(placeholder => {
+                    const inputWrapper = document.createElement('div');
+                    const label = document.createElement('label');
+                    label.className = 'text-sm text-gray-400';
+                    label.textContent = placeholder.replace(/[\[\]]/g, '');
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.dataset.placeholder = placeholder;
+                    if (placeholder === '[Sua Oferta Gratuita]') {
+                        input.placeholder = `Ex: uma consultoria de 30 minutos`;
+                    } else if (placeholder === '[Sugestões de Horário]') {
+                        input.placeholder = `Ex: quinta às 10h ou sexta às 15h`;
+                    } else {
+                        input.placeholder = `Insira ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`;
+                    }
+                    input.className = 'input-field w-full mt-1 text-white border-2 border-gray-600 rounded-lg px-3 py-2 dark-input';
+                    input.addEventListener('input', generateMessage);
+                    inputWrapper.appendChild(label);
+                    inputWrapper.appendChild(input);
+                    inputsContainer.appendChild(inputWrapper);
+                });
+
+                generateMessage(); // Gera a mensagem inicial
+            }
+
+            function generateMessage() {
+                const selectedKey = select.value;
+                let currentTemplate = templates[selectedKey].template;
+                const activeInputs = inputsContainer.querySelectorAll('input');
+                activeInputs.forEach(input => {
+                    const placeholder = input.dataset.placeholder;
+                    const value = input.value.trim() === '' ? placeholder : input.value;
+                    const regex = new RegExp(placeholder.replace(/\[/g, '\\[').replace(/\]/g, '\\]'), 'g');
+                    currentTemplate = currentTemplate.replace(regex, value);
+                });
+                output.textContent = currentTemplate;
+            }
+            
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = output.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyFeedback.textContent = 'Mensagem copiada com sucesso!';
+                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                }, () => {
+                    copyFeedback.textContent = 'Falha ao copiar.';
+                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                });
+            });
+
+            whatsappBtn.addEventListener('click', () => {
+                const message = encodeURIComponent(output.textContent);
+                window.open(`https://wa.me/?text=${message}`, '_blank');
+            });
+
+            select.addEventListener('change', updateInputsAndMessage);
+            
+            // Configuração inicial
+            updateInputsAndMessage();
         });
     </script>
 </body>
